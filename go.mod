@@ -1,6 +1,6 @@
 module github.com/johannwagner/tado-exporter-go
 
-go 1.23.2
+go 1.22
 
 require (
 	github.com/carlmjohnson/requests v0.24.2
