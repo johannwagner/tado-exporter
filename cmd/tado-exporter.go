@@ -13,12 +13,12 @@ import (
 func main() {
 
 	// Note: We may want to support a config file.
-	TADO_USERNAME := os.Getenv("TADO_USERNAME")
-	TADO_PASSWORD := os.Getenv("TADO_PASSWORD")
+	EXPORTER_USERNAME := os.Getenv("EXPORTER_USERNAME")
+	EXPORTER_PASSWORD := os.Getenv("EXPORTER_PASSWORD")
 
 	tadoClient := tado.NewTadoClient(
-		TADO_USERNAME,
-		TADO_PASSWORD,
+		EXPORTER_USERNAME,
+		EXPORTER_PASSWORD,
 	)
 
 	registry := prometheus.NewRegistry()
