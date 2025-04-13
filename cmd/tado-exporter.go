@@ -16,7 +16,7 @@ func main() {
 	EXPORTER_USERNAME := os.Getenv("EXPORTER_USERNAME")
 	EXPORTER_PASSWORD := os.Getenv("EXPORTER_PASSWORD")
 
-	tadoClient := tado.NewTadoClient(
+	tadoClient := tado.NewTadoWebClient(
 		EXPORTER_USERNAME,
 		EXPORTER_PASSWORD,
 	)
@@ -26,5 +26,6 @@ func main() {
 	tadoCollector := tadoprometheus.NewTadoCollector(tadoClient)
 	registry.MustRegister(tadoCollector)
 	http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
+	log.Println("Listening on :9898")
 	log.Fatal(http.ListenAndServe(":9898", nil))
 }

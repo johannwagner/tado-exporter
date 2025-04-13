@@ -9,7 +9,7 @@ import (
 )
 
 type TadoCollector struct {
-	client *tado.TadoClient
+	client tado.TadoClient
 
 	tadoActivityHeatingPowerPercentage *prometheus.Desc
 	tadoSettingTemperatureValue        *prometheus.Desc
@@ -17,7 +17,7 @@ type TadoCollector struct {
 	tadoSensorHumidityPercentage       *prometheus.Desc
 }
 
-func NewTadoCollector(tadoClient *tado.TadoClient) *TadoCollector {
+func NewTadoCollector(tadoClient tado.TadoClient) *TadoCollector {
 	return &TadoCollector{
 		client: tadoClient,
 		tadoActivityHeatingPowerPercentage: prometheus.NewDesc("tado_activity_heating_power_percentage",

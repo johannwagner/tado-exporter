@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-type TadoClient struct {
+type TadoWebClient struct {
 	tadoUsername string
 	tadoPassword string
 
@@ -23,9 +23,9 @@ var LEAKED_CLIENT_SECRET = "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG5
 var AUTH_URL = "https://auth.tado.com/oauth/token"
 var API_URL = "https://my.tado.com/api/v2"
 
-func NewTadoClient(tadoUsername string, tadoPassword string) *TadoClient {
+func NewTadoWebClient(tadoUsername string, tadoPassword string) *TadoWebClient {
 
-	return &TadoClient{
+	return &TadoWebClient{
 		tadoUsername:      tadoUsername,
 		tadoPassword:      tadoPassword,
 		accessToken:       nil,
@@ -35,7 +35,7 @@ func NewTadoClient(tadoUsername string, tadoPassword string) *TadoClient {
 
 }
 
-func (tc *TadoClient) processAuthResponse(ar *AuthResponse) {
+func (tc *TadoWebClient) processAuthResponse(ar *AuthResponse) {
 
 	fmt.Println(ar.AccessToken)
 
@@ -46,7 +46,7 @@ func (tc *TadoClient) processAuthResponse(ar *AuthResponse) {
 	tc.accessTokenExpiry = &expCalc
 }
 
-func (tc *TadoClient) RefreshToken(ctx context.Context) error {
+func (tc *TadoWebClient) RefreshToken(ctx context.Context) error {
 	var output AuthResponse
 	err := requests.URL(AUTH_URL).
 		BodyForm(map[string][]string{
@@ -66,7 +66,7 @@ func (tc *TadoClient) RefreshToken(ctx context.Context) error {
 	return nil
 }
 
-func (tc *TadoClient) AskForToken(ctx context.Context) error {
+func (tc *TadoWebClient) AskForToken(ctx context.Context) error {
 
 	var output AuthResponse
 
@@ -89,7 +89,7 @@ func (tc *TadoClient) AskForToken(ctx context.Context) error {
 	return nil
 }
 
-func (tc *TadoClient) EnsureAuthentication(ctx context.Context) error {
+func (tc *TadoWebClient) EnsureAuthentication(ctx context.Context) error {
 
 	// We have a valid token, go ahead.
 	if tc.accessTokenExpiry != nil && (*tc.accessTokenExpiry).After(time.Now()) {
@@ -103,7 +103,7 @@ func (tc *TadoClient) EnsureAuthentication(ctx context.Context) error {
 	return tc.AskForToken(ctx)
 }
 
-func (tc *TadoClient) GetMe(ctx context.Context) (*MeResponse, error) {
+func (tc *TadoWebClient) GetMe(ctx context.Context) (*MeResponse, error) {
 	err := tc.EnsureAuthentication(ctx)
 	if err != nil {
 		return nil, err
@@ -113,7 +113,7 @@ func (tc *TadoClient) GetMe(ctx context.Context) (*MeResponse, error) {
 	return &resp, err
 }
 
-func (tc *TadoClient) GetZones(ctx context.Context, homeId int) (*ZoneResponse, error) {
+func (tc *TadoWebClient) GetZones(ctx context.Context, homeId int) (*ZoneResponse, error) {
 	err := tc.EnsureAuthentication(ctx)
 	if err != nil {
 		return nil, err
@@ -123,7 +123,7 @@ func (tc *TadoClient) GetZones(ctx context.Context, homeId int) (*ZoneResponse, 
 	return &resp, err
 }
 
-func (tc *TadoClient) GetZoneStates(ctx context.Context, homeId int) (*ZoneStateResponse, error) {
+func (tc *TadoWebClient) GetZoneStates(ctx context.Context, homeId int) (*ZoneStateResponse, error) {
 	err := tc.EnsureAuthentication(ctx)
 	if err != nil {
 		return nil, err
