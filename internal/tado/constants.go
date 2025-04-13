@@ -8,5 +8,5 @@ var WEB_CLIENT_ID = "tado-web-app"
 var LEAKED_CLIENT_SECRET = "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc"
 
 var DEVICE_AUTH_URL = "https://login.tado.com/oauth2/device_authorize"
-var TOKEN_URL = "https://auth.tado.com/oauth/token"
+var TOKEN_URL = "https://login.tado.com/oauth2/token"
 var API_URL = "https://my.tado.com/api/v2"
