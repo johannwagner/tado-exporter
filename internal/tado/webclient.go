@@ -18,11 +18,6 @@ type TadoWebClient struct {
 	refreshToken *string
 }
 
-var LEAKED_CLIENT_SECRET = "wZaRN7rpjn3FoNyF5IFuxg9uMzYJcvOoQ8QWiIqS3hfk6gLhVlG57j5YNoZL2Rtc"
-
-var AUTH_URL = "https://auth.tado.com/oauth/token"
-var API_URL = "https://my.tado.com/api/v2"
-
 func NewTadoWebClient(tadoUsername string, tadoPassword string) *TadoWebClient {
 
 	return &TadoWebClient{
@@ -46,11 +41,16 @@ func (tc *TadoWebClient) processAuthResponse(ar *AuthResponse) {
 	tc.accessTokenExpiry = &expCalc
 }
 
+func (tc *TadoWebClient) Authorize() error {
+	// Unused
+	return nil
+}
+
 func (tc *TadoWebClient) RefreshToken(ctx context.Context) error {
 	var output AuthResponse
-	err := requests.URL(AUTH_URL).
+	err := requests.URL(TOKEN_URL).
 		BodyForm(map[string][]string{
-			"client_id":     {"tado-web-app"},
+			"client_id":     {WEB_CLIENT_ID},
 			"client_secret": {LEAKED_CLIENT_SECRET},
 			"grant_type":    {"refresh_token"},
 			"scope":         {"home.user"},
@@ -70,9 +70,9 @@ func (tc *TadoWebClient) AskForToken(ctx context.Context) error {
 
 	var output AuthResponse
 
-	err := requests.URL(AUTH_URL).
+	err := requests.URL(TOKEN_URL).
 		BodyForm(map[string][]string{
-			"client_id":     {"tado-web-app"},
+			"client_id":     {WEB_CLIENT_ID},
 			"client_secret": {LEAKED_CLIENT_SECRET},
 			"grant_type":    {"password"},
 			"scope":         {"home.user"},

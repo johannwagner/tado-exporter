@@ -13,13 +13,24 @@ import (
 func main() {
 
 	// Note: We may want to support a config file.
-	EXPORTER_USERNAME := os.Getenv("EXPORTER_USERNAME")
-	EXPORTER_PASSWORD := os.Getenv("EXPORTER_PASSWORD")
+	exporterUsername, hasUsername := os.LookupEnv("EXPORTER_USERNAME")
+	exporterPassword, hasPassword := os.LookupEnv("EXPORTER_PASSWORD")
 
-	tadoClient := tado.NewTadoWebClient(
-		EXPORTER_USERNAME,
-		EXPORTER_PASSWORD,
-	)
+	var tadoClient tado.TadoClient
+
+	if hasUsername && hasPassword {
+		tadoClient = tado.NewTadoWebClient(
+			exporterUsername,
+			exporterPassword,
+		)
+	} else {
+		tadoClient = tado.NewTadoAPIClient()
+	}
+
+	err := tadoClient.Authorize()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	registry := prometheus.NewRegistry()
 

@@ -5,6 +5,7 @@ go 1.22
 require (
 	github.com/carlmjohnson/requests v0.24.2
 	github.com/prometheus/client_golang v1.20.5
+	golang.org/x/oauth2 v0.21.0
 )
 
 require (
