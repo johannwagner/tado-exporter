@@ -10,25 +10,32 @@ import (
 )
 
 type TadoAPIClient struct {
-	client *http.Client
+	tokenSource oauth2.TokenSource
 }
 
 func NewTadoAPIClient() *TadoAPIClient {
 
 	return &TadoAPIClient{
-		client: nil,
+		tokenSource: nil,
 	}
+}
+
+type ClientNotInitializedError struct{}
+
+func (t ClientNotInitializedError) Error() string {
+	return "tado Client is currently not available, probably human interaction necessary."
 }
 
 func (t *TadoAPIClient) Authorize() error {
 	// Taken from https://support.tado.com/en/articles/8565472-how-do-i-authenticate-to-access-the-rest-api
 	config := oauth2.Config{
 		ClientID: DEVICE_FLOW_CLIENT_ID,
-		Scopes:   []string{"offline_access"},
+		Scopes:   []string{"offline_access", "home.user"},
 
 		Endpoint: oauth2.Endpoint{
 			DeviceAuthURL: DEVICE_AUTH_URL,
 			TokenURL:      TOKEN_URL,
+			AuthStyle:     oauth2.AuthStyleInParams,
 		},
 	}
 	ctx := context.Background()
@@ -49,25 +56,40 @@ func (t *TadoAPIClient) Authorize() error {
 	}
 
 	fmt.Printf("Login successful, starting...\n")
-	t.client = config.Client(ctx, token)
+	t.tokenSource = config.TokenSource(ctx, token)
+
 	return nil
 }
 
 func (t *TadoAPIClient) GetJSON(ctx context.Context, url string, res interface{}) error {
+	if t.tokenSource == nil {
+		return ClientNotInitializedError{}
+	}
+
 	fullUrl := fmt.Sprintf("%v%v", API_URL, url)
 	req, err := http.NewRequestWithContext(ctx, "GET", fullUrl, nil)
-
 	if err != nil {
 		return err
 	}
 
+	token, err := t.tokenSource.Token()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Fetching %v\n", fullUrl)
+
 	req.Header.Set("User-Agent", "tado-exporter-go - https://github.com/johannwagner/tado-exporter-go")
-	r, err := t.client.Do(req)
+	token.SetAuthHeader(req)
+	client := http.DefaultClient
+	r, err := client.Do(req)
 
 	if err != nil {
 		return err
 	}
 	defer r.Body.Close()
+
+	fmt.Printf("Completed %v with status=%v\n", fullUrl, r.StatusCode)
 
 	return json.NewDecoder(r.Body).Decode(res)
 }

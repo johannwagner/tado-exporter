@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 )
 
 func main() {
@@ -27,16 +28,29 @@ func main() {
 		tadoClient = tado.NewTadoAPIClient()
 	}
 
-	err := tadoClient.Authorize()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	registry := prometheus.NewRegistry()
 
 	tadoCollector := tadoprometheus.NewTadoCollector(tadoClient)
 	registry.MustRegister(tadoCollector)
-	http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
 	log.Println("Listening on :9898")
-	log.Fatal(http.ListenAndServe(":9898", nil))
+
+	wg := sync.WaitGroup{}
+
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		err := tadoClient.Authorize()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		http.Handle("/metrics", promhttp.HandlerFor(registry, promhttp.HandlerOpts{}))
+		log.Fatal(http.ListenAndServe(":9898", nil))
+	}()
+
+	wg.Wait()
 }
